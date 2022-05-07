@@ -7,6 +7,7 @@ import re
 import os.path
 from argparse import ArgumentParser
 import pandas as pd
+import csv
 
 from input.utils import read_data, read_en_corpus, read_pt_corpus
 
@@ -65,23 +66,14 @@ if os.path.exists(outf):
     if ans == 'n' and ans == 'no':
         exit(0)
         
-out = open(outf, 'w+')
-
-# Print head
-out.write('"compound","compositionality","sentence1","sentence2","sentence3"\n')
-for c in compounds:
-    out.write('"{}","{}",'.format(c, compounds[c]['comp']))
-    if 'sent1' in compounds[c]:
-        out.write('"{}",'.format(compounds[c]['sent1']))
-    else:
-        out.write(',')
-    if 'sent2' in compounds[c]:
-        out.write('"{}",'.format(compounds[c]['sent2']))
-    else:
-        out.write(',')
-    if 'sent3' in compounds[c]:
-        out.write('"{}"\n'.format(compounds[c]['sent3']))
-    else:
-        out.write('\n')
-out.close()
+with open(outf, 'w', newline='') as out:
+    # Print head
+    writer = csv.writer(out)
+    writer.writerow(["compound","compositionality","sentence1","sentence2","sentence3"])
+    for c in compounds:
+        row = [c, compounds[c]['comp']]
+        for sidx in ['sent1', 'sent2', 'sent3']:
+            if sidx in compounds[c]:
+                row.append(compounds[c][sidx])
+        writer.writerow(row)
 print('File %s created' %outf)
